@@ -1,6 +1,8 @@
-import 'dart:convert';
+import 'dart:convert'; // for json
 import 'package:flutter/material.dart';
 import 'package:layout/pages/detail.dart';
+import 'package:http/http.dart' as http; // for request
+import 'dart:async'; // for request too (asynchronus dart)
 
 class HomePage extends StatefulWidget {
   // const HomePage({ Key? key }) : super(key: key);
@@ -38,20 +40,21 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.all(10),
         child: FutureBuilder(
           // builder, future
-          builder: (context, snapshot) {
-            var data = json.decode(snapshot.data.toString());
+          builder: (context, AsyncSnapshot snapshot) {
+            // var data = json.decode(snapshot.data.toString());
             return ListView.builder(
               // itemBuilder, itemCount
               itemBuilder: (BuildContext context, int index) {
                 // this function return widget
-                return MyBox(data[index]["title"], data[index]["subtitle"],
-                    data[index]["image_url"], data[index]["detail"]);
+                return MyBox(snapshot.data[index]["title"], snapshot.data[index]["subtitle"],
+                    snapshot.data[index]["image_url"], snapshot.data[index]["detail"]);
               },
-              itemCount: data.length,
+              itemCount: snapshot.data.length,
             );
           },
-          future: DefaultAssetBundle.of(context)
-              .loadString('assets/data.json'), // source of data
+          // future: DefaultAssetBundle.of(context)
+          //     .loadString('assets/data.json'), // source of data
+          future: getdata(),
         ),
       ),
     );
@@ -102,4 +105,13 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Future getdata() async {
+    // https://raw.githubusercontent.com/IsoonSer/FlutterBootcamp1/main/assets/data.json
+    var url = Uri.https('raw.githubusercontent.com', '/IsoonSer/FlutterBootcamp1/main/assets/data.json');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    return result;
+  }
+
 }
